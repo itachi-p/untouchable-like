@@ -1,2 +1,21 @@
-# untouchable-like
-「いいね」を押すか押さないかの判断疲れが増している（と推察される）現状への皮肉。
+# Unreachable Like Button
+
+「いいね」を追いかけるのを、やめてみた。
+
+### About
+永遠に捕まらない「いいね」ボタン。ただそれだけ。  
+「捕まえられないなら、最初から追う必要もないよね？」てきな。
+
+BGMは旧 [Champagne]（現 [Alexandros]）
+**"Kill Me If You Can"** [ (オフィシャルMV) ](https://youtu.be/8HwOhNedQaU?si=XrdUSPQ7nOS0PIQl)
+
+バンド改名の経緯は自分的には日本ワイン協会の印象が悪くなった、Rockでもない話。
+
+### Philosophy
+「いいね」を追ってるのか、「いいね」に追われてるのか…  
+てきな皮肉もあるのかもしれない。
+
+その真偽は神の味噌汁。
+
+---
+Developed by **itachi-P**
