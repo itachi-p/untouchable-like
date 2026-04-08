@@ -277,6 +277,22 @@
   }
 
   #hint.hidden { opacity: 0; }
+
+ /* ダミー通知のスタイル */
+.dummy-toast {
+  position: fixed;
+  bottom: 100px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 1000;
+  pointer-events: none;
+}
+.dummy-toast.show { opacity: 1; }
 </style>
 </head>
 
@@ -320,14 +336,15 @@
   </div>
   <div class="action-bar">
     <!-- コメント -->
-    <div class="action-item">
+    <div class="action-item" onclick="showDummyToast('ゴメンね！コレもダミーだお！')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
       <span>-6.02</span>
     </div>
+   
     <!-- 引用 -->
-    <div class="action-item">
+    <div class="action-item" onclick="showDummyToast('1那由多の引用はあなたの心の中にあります。')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <polyline points="17 1 21 5 17 9"/>
         <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
@@ -336,6 +353,7 @@
       </svg>
       <span>1那由多</span>
     </div>
+   
     <!-- いいね プレースホルダー（透明・位置合わせ用） -->
     <div class="action-item" id="like-placeholder" style="opacity:0;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -368,7 +386,9 @@
   </svg>
   <span>0</span>
 </button>
-
+ 
+<div id="dummy-toast" class="dummy-toast"></div>
+ 
 <script>
   const btn = document.getElementById('like-btn');
   const placeholder = document.getElementById('like-placeholder');
@@ -513,6 +533,17 @@
       sorryComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 600);
   }
+const toast = document.getElementById('dummy-toast');
+let toastTimer;
+
+function showDummyToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000); // 2秒で消える
+}
 </script>
 </body>
 </html>
