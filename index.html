@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>逃げるいいね</title>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #f0f0f0;
+    min-height: 100vh;
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+    overflow-x: hidden;
+  }
+
+  /* ヘッダー */
+  .app-header {
+    width: 100%;
+    max-width: 430px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 16px;
+  }
+
+  .app-header .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: #111;
+  }
+
+  .app-header .icons {
+    display: flex;
+    gap: 16px;
+    color: #333;
+    font-size: 20px;
+  }
+
+  /* 投稿カード */
+  .post-card {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 430px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 12px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c8e6c9, #81c784);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .user-info { flex: 1; }
+
+  .username {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .handle-time {
+    font-size: 12px;
+    color: #999;
+    margin-top: 1px;
+  }
+
+  .follow-btn {
+    font-size: 12px;
+    color: #1a73e8;
+    font-weight: 600;
+    border: 1.5px solid #1a73e8;
+    border-radius: 100px;
+    padding: 4px 12px;
+  }
+
+  .post-body {
+    padding: 0 16px 14px;
+  }
+
+  /* タイトル行だけ目立つフォント */
+  .post-title {
+    font-family: 'Kaisei Decol', 'Hiragino Mincho ProN', Georgia, serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+
+  .post-sub {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #444;
+  }
+
+  /* アクションバー */
+  .action-bar {
+    border-top: 1px solid #f0f0f0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    height: 48px;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #888;
+    padding: 6px 14px 6px 0;
+    cursor: default;
+  }
+
+  .action-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* 動くいいねボタン */
+  #like-btn {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    z-index: 200;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  #like-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: rotate(0deg) scale(1); }
+    20%  { transform: rotate(-10deg) scale(1.08); }
+    40%  { transform: rotate(10deg) scale(1.12); }
+    60%  { transform: rotate(-7deg) scale(1.08); }
+    80%  { transform: rotate(7deg) scale(1.05); }
+  }
+
+  @keyframes spin-panic {
+    0%,100% { transform: rotate(0deg) scale(1.15); }
+    25%  { transform: rotate(-25deg) scale(1.2); }
+    75%  { transform: rotate(25deg) scale(1.2); }
+  }
+
+  #like-btn.nervous {
+    animation: shake 0.25s ease-in-out infinite;
+    color: #e57373;
+  }
+
+  #like-btn.panic {
+    animation: spin-panic 0.18s ease-in-out infinite;
+    color: #f44336;
+  }
+
+  /* 軌跡 */
+  .trail {
+    position: fixed;
+    pointer-events: none;
+    z-index: 150;
+    font-size: 13px;
+    opacity: 0;
+    animation: trail-anim 0.7s ease-out forwards;
+  }
+
+  @keyframes trail-anim {
+    0%   { opacity: 0.8; transform: translateY(0) scale(1); }
+    100% { opacity: 0;   transform: translateY(-28px) scale(0.3); }
+  }
+
+  /* 返信コメント */
+  #sorry-comment {
+    width: 100%;
+    max-width: 430px;
+    margin-top: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+    pointer-events: none;
+  }
+
+  #sorry-comment.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sorry-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fce4ec, #ef9a9a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .sorry-body { flex: 1; }
+
+  .sorry-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 4px;
+  }
+
+  .sorry-handle {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+
+  .sorry-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.75;
+  }
+
+  .sorry-text .line2 {
+    color: #888;
+    font-size: 13px;
+  }
+
+  /* ヒント */
+  #hint {
+    margin-top: 16px;
+    font-size: 12px;
+    color: #bbb;
+    text-align: center;
+    transition: opacity 0.4s;
+    letter-spacing: 0.04em;
+  }
+
+  #hint.hidden { opacity: 0; }
+</style>
+</head>
+
+<footer style="margin-top: 40px; padding-bottom: 20px; text-align: center;">
+  <a href="https://github.com/itachi-p/untouchable-like" 
+     style="color: #bbb; font-size: 11px; text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s;"
+     onmouseover="this.style.color='#888'" 
+     onmouseout="this.style.color='#bbb'">
+    VIEW README / REPOSITORY
+  </a>
+</footer>
+
+<body>
+
+<!-- ヘッダー -->
+<div class="app-header">
+  <div class="logo">Tnreads</div>
+  <div class="icons">
+    <span>✏️</span>
+    <span>🔔</span>
+  </div>
+</div>
+
+<!-- 投稿カード -->
+<div class="post-card">
+  <div class="post-header">
+    <div class="avatar">🦦</div>
+    <div class="user-info">
+      <div class="username">いたち</div>
+      <div class="handle-time">@itachi · 3分前</div>
+    </div>
+    <div class="follow-btn">フォロー</div>
+  </div>
+  <div class="post-body">
+    <div class="post-title">逃げるいいねボタンが欲しい</div>
+    <div class="post-sub">
+      カーソルを近づけると逃げるやつ。<br>
+      「反応しない」方にこそコストがかかる。<br>
+      なら、押せなければいいのでは…天才か？！
+    </div>
+  </div>
+  <div class="action-bar">
+    <!-- コメント -->
+    <div class="action-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>-6.02</span>
+    </div>
+    <!-- 引用 -->
+    <div class="action-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <polyline points="17 1 21 5 17 9"/>
+        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+        <polyline points="7 23 3 19 7 15"/>
+        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+      </svg>
+      <span>1那由多</span>
+    </div>
+    <!-- いいね プレースホルダー（透明・位置合わせ用） -->
+    <div class="action-item" id="like-placeholder" style="opacity:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      <span>0</span>
+    </div>
+  </div>
+</div>
+
+<!-- 返信コメント -->
+<div id="sorry-comment">
+  <div class="sorry-avatar">💔</div>
+  <div class="sorry-body">
+    <div class="sorry-name">いいねボタン</div>
+    <div class="sorry-handle">@like_btn · 今</div>
+    <div class="sorry-text">
+      残念でした！🏃=3<br>
+      <span class="line2">「いいね」という概念のない世界線に移動しました。</span>
+    </div>
+  </div>
+</div>
+
+<div id="hint">↑ いいねを押してみてください</div>
+
+<!-- 動くいいねボタン -->
+<button id="like-btn" aria-label="いいね">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </svg>
+  <span>0</span>
+</button>
+
+<script>
+  const btn = document.getElementById('like-btn');
+  const placeholder = document.getElementById('like-placeholder');
+  const hint = document.getElementById('hint');
+  const sorryComment = document.getElementById('sorry-comment');
+
+  let btnX = 0, btnY = 0;
+  let fleeCount = 0;
+  const MAX_FLEE = 5;
+  let isEscaped = false;
+  let isMoving = false;
+  let hintHidden = false;
+
+  const NERVOUS_R = 90;
+  const PANIC_R   = 45;
+
+  function initPos() {
+    const r = placeholder.getBoundingClientRect();
+    btnX = r.left;
+    btnY = r.top;
+    btn.style.left = btnX + 'px';
+    btn.style.top  = btnY + 'px';
+  }
+
+  window.addEventListener('load', () => setTimeout(initPos, 120));
+  window.addEventListener('resize', initPos);
+
+  document.addEventListener('mousemove', (e) => {
+    if (isEscaped) return;
+    handle(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('touchmove', (e) => {
+    if (isEscaped) return;
+    const t = e.touches[0];
+    handle(t.clientX, t.clientY);
+  }, { passive: true });
+
+  document.addEventListener('touchstart', (e) => {
+    if (isEscaped) return;
+    const t = e.touches[0];
+    handle(t.clientX, t.clientY);
+  }, { passive: true });
+
+  function handle(cx, cy) {
+    const bRect = btn.getBoundingClientRect();
+    const bCX = bRect.left + bRect.width / 2;
+    const bCY = bRect.top  + bRect.height / 2;
+    const dx  = cx - bCX;
+    const dy  = cy - bCY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    if (!hintHidden && dist < 250) {
+      hint.classList.add('hidden');
+      hintHidden = true;
+    }
+
+    if (dist < PANIC_R) {
+      btn.classList.remove('nervous'); btn.classList.add('panic');
+    } else if (dist < NERVOUS_R) {
+      btn.classList.remove('panic'); btn.classList.add('nervous');
+    } else {
+      btn.classList.remove('nervous', 'panic');
+    }
+
+    if (dist < NERVOUS_R && !isMoving) flee(dx, dy, dist);
+  }
+
+  function flee(dx, dy, dist) {
+    isMoving = true;
+    const angle   = Math.atan2(dy, dx);
+    const fleeAng = angle + Math.PI + (Math.random() - 0.5) * 1.0;
+    const speed   = 100 + (NERVOUS_R - dist) * 2.2;
+
+    let nx = btnX + Math.cos(fleeAng) * speed;
+    let ny = btnY + Math.sin(fleeAng) * speed;
+
+    const mg  = 30;
+    const maxX = window.innerWidth  - mg - 80;
+    const maxY = window.innerHeight - mg - 40;
+
+    if (nx < mg) nx = mg + Math.random() * 40;
+    if (nx > maxX) nx = maxX - Math.random() * 40;
+    if (ny < mg) ny = mg + Math.random() * 30;
+    if (ny > maxY) ny = maxY - Math.random() * 30;
+
+    spawnTrails(btnX, btnY);
+
+    btnX = nx; btnY = ny;
+    btn.style.transition = 'left 0.16s cubic-bezier(0.2,0,0.8,1), top 0.16s cubic-bezier(0.2,0,0.8,1)';
+    btn.style.left = btnX + 'px';
+    btn.style.top  = btnY + 'px';
+
+    fleeCount++;
+
+    setTimeout(() => {
+      btn.style.transition = '';
+      isMoving = false;
+      if (fleeCount >= MAX_FLEE) finalEscape();
+    }, 180);
+  }
+
+  function spawnTrails(x, y) {
+    ['💔','🤍','♡'].forEach((ch, i) => {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'trail';
+        el.textContent = ch;
+        el.style.left = (x + Math.random()*30 - 10) + 'px';
+        el.style.top  = (y + Math.random()*20 - 5)  + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+      }, i * 80);
+    });
+  }
+
+  function finalEscape() {
+    isEscaped = true;
+    btn.classList.remove('nervous','panic');
+
+    const exits = [
+      { x: -200,                    y: btnY },
+      { x: window.innerWidth + 200, y: btnY },
+      { x: btnX,                    y: -200 },
+      { x: btnX,                    y: window.innerHeight + 200 },
+    ];
+    const ex = exits[Math.floor(Math.random() * exits.length)];
+
+    btn.style.transition = 'left 0.5s ease-in, top 0.5s ease-in, opacity 0.4s';
+    btn.style.left    = ex.x + 'px';
+    btn.style.top     = ex.y + 'px';
+    btn.style.opacity = '0';
+
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => spawnTrails(btnX, btnY), i * 60);
+    }
+
+    setTimeout(() => {
+      btn.style.display = 'none';
+      sorryComment.classList.add('visible');
+      // 返信が見えるようスクロール
+      sorryComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 600);
+  }
+</script>
+</body>
+</html>
