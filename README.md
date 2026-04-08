@@ -9,7 +9,7 @@
 BGMは旧 [Champagne]（現 [Alexandros]）
 **"Kill Me If You Can"** [ (オフィシャルMV) ](https://youtu.be/8HwOhNedQaU?si=XrdUSPQ7nOS0PIQl)
 
-ホントは"Catch Me If You Can"って曲名だと思って言い出したが、どーやらデカプリオンの映画タイトルと混じった模様。
+ホントは **"Catch Me If You Can"** って曲名だと思って言い出したが、どーやらデカプリオの映画タイトルと混じった模様。
 
 なお、バンド改名の経緯は自分的には日本ワイン協会の印象が悪くなった、Rockでもない話。
 
